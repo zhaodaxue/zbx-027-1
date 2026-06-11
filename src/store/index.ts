@@ -39,12 +39,12 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   fetchBatchDetail: async (id) => {
-    set({ loading: true })
+    set({ loading: true, batchDetail: null })
     try {
       const data = await api.getBatch(id)
       set({ batchDetail: data as BatchDetail })
     } catch (e) {
-      set({ error: (e as Error).message })
+      set({ error: (e as Error).message, batchDetail: null })
     } finally {
       set({ loading: false })
     }

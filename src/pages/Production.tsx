@@ -67,7 +67,12 @@ export default function Production() {
               <select
                 className="input-field"
                 value={form.batchId}
-                onChange={(e) => setForm({ ...form, batchId: e.target.value, process: '细编' })}
+                onChange={(e) => {
+                  const batchId = e.target.value
+                  const batch = batches.find((b) => b.id === batchId)
+                  const defaultProcess = batch?.isDowngraded ? '粗编' : '细编'
+                  setForm({ ...form, batchId, process: defaultProcess })
+                }}
                 required
               >
                 <option value="">请选择可投产批次...</option>

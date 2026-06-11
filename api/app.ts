@@ -39,15 +39,19 @@ app.use(async (req, res, next) => {
 
 app.use('/api', apiRoutes)
 
-app.use(
-  '/api/health',
-  (req: Request, res: Response, next: NextFunction): void => {
-    res.status(200).json({
-      success: true,
-      message: 'ok',
-    })
-  },
-)
+app.use('/api/health', (req: Request, res: Response): void => {
+  res.status(200).json({
+    success: true,
+    message: 'ok',
+  })
+})
+
+app.use('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: 'API 接口不存在',
+  })
+})
 
 const distDir = path.join(__dirname, '..', 'dist')
 app.use(express.static(distDir))
@@ -59,14 +63,7 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(error)
   res.status(500).json({
     success: false,
-    error: error.message || 'Server internal error',
-  })
-})
-
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'API not found',
+    error: error.message || '服务器内部错误',
   })
 })
 

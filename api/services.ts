@@ -108,6 +108,21 @@ export const batchService = {
 
   async create(req: CreateBatchRequest): Promise<Batch> {
     const db = await getDb()
+
+    if (!['毛竹', '慈竹'].includes(req.source)) {
+      throw new Error('篾条来源必须为【毛竹】或【慈竹】')
+    }
+    if (!['细编', '粗编'].includes(req.usage)) {
+      throw new Error('用途必须为【细编】或【粗编】')
+    }
+    if (typeof req.initialMoisture !== 'number' || isNaN(req.initialMoisture) ||
+        req.initialMoisture < 0 || req.initialMoisture > 100) {
+      throw new Error('初始含水率必须在 0% 到 100% 之间')
+    }
+    if (!req.dryingDays || req.dryingDays <= 0) {
+      throw new Error('晾晒天数必须大于 0')
+    }
+
     const existing = getOne(db, 'SELECT id FROM batches WHERE batch_no = ?', [req.batchNo])
     if (existing) {
       throw new Error('批次号已存在')
@@ -167,7 +182,13 @@ export const batchService = {
     const db = await getDb()
     const batch = await this.getById(batchId)
     if (!batch) throw new Error('批次不存在')
-    if (batch.status === '已投产') throw new Error('批次已投产，不可再检测')
+    if (batch.status === '可投产' || batch.status === '已投产') {
+      throw new Error(`批次当前状态为【${batch.status}】，不可再检测`)
+    }
+    if (typeof req.moisture !== 'number' || isNaN(req.moisture) ||
+        req.moisture < 0 || req.moisture > 100) {
+      throw new Error('含水率必须在 0% 到 100% 之间')
+    }
 
     const isQualified = req.moisture <= MAX_MOISTURE
     let newStatus: Batch['status'] = batch.status

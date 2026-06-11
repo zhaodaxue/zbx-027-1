@@ -52,6 +52,12 @@ router.post(
     try {
       const { moisture, operator } = req.body
       if (moisture == null) return fail(res, '缺少含水率数据')
+      if (typeof moisture !== 'number' || isNaN(moisture)) {
+        return fail(res, '含水率必须为有效数字')
+      }
+      if (moisture < 0 || moisture > 100) {
+        return fail(res, '含水率必须在 0% 到 100% 之间')
+      }
       const result = await batchService.testMoisture(req.params.id, {
         moisture,
         operator: operator || '管理员',
